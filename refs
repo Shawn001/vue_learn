@@ -1,0 +1,44 @@
+<html>
+<head>
+</head>
+
+<body>
+    <div id="app">
+        <h2>父组件</h2>
+        <button @click="btnClick">按钮</button>
+        <sub1 ref="aaa"></sub1>
+    </div>
+</body>
+
+<template id='sub1'>
+<div>
+<h2>sub1 ipnut</h2>
+</div>
+</template>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            father_message: "message in father"
+        },
+        methods:{
+            btnClick(){
+                console.log(this.$refs.aaa.son_message);
+            }
+        },
+        components: {
+            sub1: {
+            template: "#sub1",
+            data: function(){
+                return {
+                    son_message: "sdfasfas",
+                }
+            },  
+        }
+        }
+    })
+</script>
+
+</html>
