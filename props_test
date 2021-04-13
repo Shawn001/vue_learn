@@ -4,20 +4,18 @@
 
 <body>
     <div id="app">
-        <input type="text"  :value="father_message" @input="father_input"></input>
+        <input type="text"  :value="father_message" @input="father_input">
         <h2>input in app:{{father_message}}</h2>
-        
-		<sub1 @submsg_change="submsg_change" :recv_father_message="father_message"> </sub1>
+        <sub1 @submsg_change="submsg_change" :recv_father_message="father_message"></sub1>
     </div>
 </body>
 
 <template id='sub1'>
 <div>
-    <input type="text" :value="son_input" @input="sub_input">
-    <h2>sub1 ipnut:{{son_input}}</h2>
-    <h2>sub :{{recv_father_message}}</h2>
+<input type="text" :value="son_input" @input="sub_input">
+<h2>sub1 ipnut:{{son_input}}</h2>
+<h2>sub :{{son_message}}</h2>
 </div>
-
 </template>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 
@@ -33,7 +31,7 @@
                 console.log('监听到子发送得事件');
             },
             father_input(event){
-                this.father_message= event.target.value;
+                this.father_message = event.target.value;
                 console.log('监听到app组件输入变化');
             }
         },
@@ -46,15 +44,21 @@
             data: function(){
                 return {
                     son_message: this.recv_father_message,
-                    son_input: this.recv_father_message,
+                    son_input: this.son_message,
                 }
             },
             methods:{
                 sub_input(event){
                     this.son_input = event.target.value;
-                    this.$emit('submsg_change', this.son_input);
+                    this.$emit('submsg_change', this.son_input)
                 },
             },
+            watch:{
+                recv_father_message(newValue){
+                    this.son_message = newValue;
+                    this.son_input = newValue;
+                }
+            }
         }
         }
     })
