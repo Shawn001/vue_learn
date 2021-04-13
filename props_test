@@ -1,0 +1,63 @@
+<html>
+<head>
+</head>
+
+<body>
+    <div id="app">
+        <input type="text"  :value="father_message" @input="father_input"></input>
+        <h2>input in app:{{father_message}}</h2>
+        
+		<sub1 @submsg_change="submsg_change" :recv_father_message="father_message"> </sub1>
+    </div>
+</body>
+
+<template id='sub1'>
+<div>
+    <input type="text" :value="son_input" @input="sub_input">
+    <h2>sub1 ipnut:{{son_input}}</h2>
+    <h2>sub :{{recv_father_message}}</h2>
+</div>
+
+</template>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            father_message: "message in father"
+        },
+        methods:{
+            submsg_change(value){
+                this.father_message = value;
+                console.log('监听到子发送得事件');
+            },
+            father_input(event){
+                this.father_message= event.target.value;
+                console.log('监听到app组件输入变化');
+            }
+        },
+        components: {
+            sub1: {
+            template: "#sub1",
+            props:{
+                recv_father_message: String,
+            },
+            data: function(){
+                return {
+                    son_message: this.recv_father_message,
+                    son_input: this.recv_father_message,
+                }
+            },
+            methods:{
+                sub_input(event){
+                    this.son_input = event.target.value;
+                    this.$emit('submsg_change', this.son_input);
+                },
+            },
+        }
+        }
+    })
+</script>
+
+</html>
