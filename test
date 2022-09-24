@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+#encoding: gbk
+import requests
+from bs4 import BeautifulSoup
+from bs4 import element
+import re
+import sqlite3
+
+url ='https://qd.lianjia.com/ershoufang/rs%E5%9B%9B%E5%AD%A3%E6%99%AF%E5%9B%AD'
+url ='https://qd.lianjia.com/ershoufang/pg2rs%E5%9B%9B%E5%AD%A3%E6%99%AF%E5%9B%AD'
+url ='https://qd.lianjia.com/ershoufang/pg3rs%E5%9B%9B%E5%AD%A3%E6%99%AF%E5%9B%AD'
+
+cursor = None
+
+try:
+    conn = sqlite3.connect('c:\house.db')
+    cursor = conn.cursor()
+except  Exception as e:
+    raise ('connect_db_error')
+
+def getHtml(url):
+    headers = {"user-agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0"}
+    try:
+        resp = requests.get(url, headers=headers)
+        resp.encoding = resp.apparent_encoding
+        resp.raise_for_status()
+    except:
+        print("error")
+    return resp.text
+
+def parse_cols(ret):
+    list_all = []
+    #print(ret)
+    soup = BeautifulSoup(ret, 'html.parser')
+    for sell in soup.findAll("div", attrs={'class':"info clear"}):
+        code = ''
+        info = ''
+        price = ''
+        #print(sell.prettify())
+        house_code_div = sell.select('div>div>a')
+        if len(house_code_div) > 0:
+            code = house_code_div[0].get('data-housecode')
+        else:
+            continue
+        house_info_span = sell.select('div>div>div[class="houseInfo"]')
+        house_info = house_info_span[0].text
+        house_price_div = sell.select('div>div>div[class="totalPrice totalPrice2"]')
+        price = house_price_div[0].text
+        (layout, area, direction, remodel, floor, year, _) = house_info.split('|')
+        insert_row(code, layout, area, direction, remodel, floor, year, price)
+        print(layout, area, direction, remodel, floor, year, price)
+    return list_all
+
+def insert_row(code, layout, area, direction, remodel, floor, year, price):
+    print(f'insert ignore into house_info(code, layout, area, direction, remodel,floor,year, price) values("{code}","{layout}","{area}","{direction}","{remodel}","{floor}","{year}","{price}")')
+    cursor.execute(f'insert or ignore into house_info(code, layout, area, direction, remodel,floor,year, price) values("{code}","{layout}","{area}","{direction}","{remodel}","{floor}","{year}","{price}")')
+
+def read_rows():
+    ''' read all rows'''
+    cursor.execute('select * from house_info')
+
+if __name__=='__main__':
+    ret = getHtml(url)
+    list_all = parse_cols(ret)
+    cursor.close()
+    conn.commit()
+    conn.close()
